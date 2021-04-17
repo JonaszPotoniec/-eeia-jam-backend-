@@ -1,0 +1,27 @@
+{
+  "name": "-eeia-jam-backend-",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JonaszPotoniec/-eeia-jam-backend-.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JonaszPotoniec/-eeia-jam-backend-/issues"
+  },
+  "homepage": "https://github.com/JonaszPotoniec/-eeia-jam-backend-#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.7",
+    "sequelize": "^6.6.2",
+    "sqlite3": "^5.0.2"
+  }
+}
