@@ -1,7 +1,8 @@
 import DataTypes from "sequelize";
+import {Event} from '../db/connect.js';
 
 const localizationInit = (db) => {
-  return db.define("Localization", {
+  const Localization = db.define("Localization", {
     localization_id: {
       type: DataTypes.UUID,
       allowNull: false,
@@ -18,6 +19,7 @@ const localizationInit = (db) => {
       allowNull: false,
     },
   });
+  return Localization;
 };
 
 export default localizationInit;

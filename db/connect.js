@@ -15,6 +15,15 @@ const Localization = localizationInit(db);
 const Event = eventInit(db);
 const EventType = eventTypeInit(db);
 
+Localization.hasMany(Event, { foreignKey: "localization_id" });
+Event.belongsTo(Localization, { foreignKey: "localization_id" });
+
+User.hasMany(Event, { foreignKey: "user_id" });
+Event.belongsTo(User, { foreignKey: "user_id" });
+
+Event.belongsTo(EventType, { foreignKey: "event_type_id" });
+EventType.hasMany(Event, { foreignKey: "event_type_id" });
+
 const connect = async () => {
     try {
 

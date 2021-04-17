@@ -1,9 +1,29 @@
 import {Event} from '../db/connect.js'
-
+import QueryTypes from 'sequelize'
 
 const getEvent = async (req, res) =>{
     try{
-        const found = Event.findAll();
+        const found = await Event.findAll();
+        res.json(found);
+    }catch(error){
+        res.status(400).json({error: error.message});
+    }
+}
+
+const getClosestEvent = async (req, res) =>{
+    try{
+        const found = await Event.query(
+            "SELECT * FROM events as e join localization as l on e.localization_id = l.localization_id " + 
+            "where ABS(l.longitude - :lon) <= :dis AND ABS(l.latitude - :lat) <= :dis",
+             {
+                replacements:
+                {
+                    lat:req.body.latitude,
+                    lon:req.body.longitude,
+                    dis:req.body.distance
+                },     
+                type: QueryTypes.SELECT 
+            });
         res.json(found);
     }catch(error){
         res.status(400).json({error: error.message});
@@ -69,5 +89,6 @@ export {
     getEventById,
     postEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent,
+    getClosestEvent
 }

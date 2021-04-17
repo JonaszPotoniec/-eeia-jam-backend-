@@ -1,6 +1,6 @@
 import {Router} from 'express'
-import {getEvent, getEventById, postEvent, deleteEvent, updateEvent} from '../controllers/eventController.js'
-
+import {getEvent, getEventById, postEvent, deleteEvent, updateEvent,getClosestEvent} from '../controllers/eventController.js'
+import protect from '../middleware/passport.js'
 const router = Router();
 
 router
@@ -11,8 +11,11 @@ router
 router
     .route('/events/:id')
     .get(getEventById)
-    .put(updateEvent)
-    .delete(deleteEvent);
+    .put(protect, updateEvent)
+    .delete(protect, deleteEvent);
 
+router
+    .route('/events/nearest')
+    .get(getClosestEvent);
 
 export default router;    

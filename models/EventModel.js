@@ -1,7 +1,7 @@
 import DataTypes from 'sequelize'
 
 const eventInit = (db) => {
-    return db.define('Event',{
+    const Event =  db.define('Event',{
         event_id:{
             type: DataTypes.UUID,
             allowNull: false,
@@ -27,6 +27,9 @@ const eventInit = (db) => {
             allowNull:false,
         }
     })
+
+    return Event;
+
 }
 
 export default eventInit;

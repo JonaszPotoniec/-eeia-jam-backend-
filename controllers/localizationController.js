@@ -3,7 +3,7 @@ import * as statuses from './httpStatusCodes.js'
 
 const getLocalization = async (req, res) =>{
     try{
-        const found = Localization.findAll();
+        const found = await Localization.findAll();
         res.json(found);
     }catch(error){
         res.status(statuses.HTTP_BAD_REQUEST).json({error: error.message});
@@ -13,7 +13,7 @@ const getLocalization = async (req, res) =>{
 const getLocalizationById = async (req, res) =>{
     const id = req.params.id
     try{
-        const found = Localization.findByPk({where: {id}});
+        const found = await Localization.findByPk(id);
         res.json(found);
     }catch(error){
         res.status(statuses.HTTP_BAD_REQUEST).json({error: error.message});
