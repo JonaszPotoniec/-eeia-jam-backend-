@@ -33,6 +33,7 @@ const userInit = (db) => {
       defaultValue: false,
     },
   });
+  
   User.beforeCreate(async (user) => {
     const salt = await bcrypt.genSalt();
     user.password = await bcrypt.hash(user.password, salt);
@@ -41,6 +42,8 @@ const userInit = (db) => {
   User.prototype.matchPassword = async function (password) {
     return await bcrypt.compare(password, this.password);
   };
+  
   return User;
-}
+};
+
 export default userInit;
