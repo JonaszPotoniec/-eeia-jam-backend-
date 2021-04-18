@@ -33,6 +33,9 @@ const userInit = (db) => {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
+      set() {
+        this.setDataValue('verified', true);
+      }
     },
     is_official: {
       type: DataTypes.BOOLEAN,
@@ -55,7 +58,7 @@ const userInit = (db) => {
   User.prototype.generateAuthToken = async function () {
     return jwt.sign({user_id: this.user_id}, '123456', {expiresIn: '1h'})
   }
-
+ 
   return User;
 };
 

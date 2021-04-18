@@ -1,12 +1,13 @@
 import {Localization} from '../db/connect.js'
 import * as statuses from './httpStatusCodes.js' 
+import {respondWithError, respondWithJSON} from '../config/utils.js'
 
 const getLocalization = async (req, res) =>{
     try{
         const found = await Localization.findAll();
-        res.json(found);
+        respondWithJSON(res,statuses.HTTP_FOUND,found);
     }catch(error){
-        res.status(statuses.HTTP_BAD_REQUEST).json({error: error.message});
+        respondWithError(res,statuses.HTTP_BAD_REQUEST,error.message);
     }
 }
 
@@ -14,18 +15,18 @@ const getLocalizationById = async (req, res) =>{
     const id = req.params.id
     try{
         const found = await Localization.findByPk(id);
-        res.json(found);
+        respondWithJSON(res,statuses.HTTP_FOUND,found);
     }catch(error){
-        res.status(statuses.HTTP_BAD_REQUEST).json({error: error.message});
+        respondWithError(res,statuses.HTTP_BAD_REQUEST,error.message);
     }
 }
 
 const postLocalization = async(req,res)=>{
     try{
         const localization = await Localization.create(req.body);
-        res.status(statuses.HTTP_ACCEPTED).json(localization);
+        respondWithJSON(res,statuses.HTTP_CREATED,localization);
     }catch(error){
-        res.status(statuses.HTTP_BAD_REQUEST).json({error: error.message});
+        respondWithError(res,statuses.HTTP_BAD_REQUEST,error.message);
     }
 }
 
@@ -33,9 +34,9 @@ const deleteLocalization = async (req, res) => {
     const id = req.params.id;
     try {
         await Localization.destroy({where: {id}})
-        res.status(statuses.HTTP_ACCEPTED).json({localization_id: id});
+        respondWithJSON(res,statuses.HTTP_ACCEPTED,{localization_id:id});
     } catch (error){
-        res.status(statuses.HTTP_NOT_FOUND).json({error: error.message});
+        respondWithError(res,statuses.HTTP_NOT_FOUND,error.message);
     }
 }
 
@@ -50,10 +51,9 @@ const updateLocalization = async(req,res)=>{
 
         const updatedLocalization = await Localization.save();
         
-        res.status(statuses.HTTP_ACCEPTED).json(updateLocalization);
-
+        respondWithJSON(res,statuses.HTTP_CREATED,updatedLocalization);
     }catch(error){
-        res.status(statuses.HTTP_NOT_MODIFIED).json({error: error.message});
+        respondWithError(res,statuses.HTTP_NOT_MODIFIED,error.message);
     }
 }
 

@@ -9,7 +9,7 @@ router
     .post(postEvent);
     
 router
-    .route('/events/:id')
+    .route('/events/id/:id')
     .get(getEventById)
     .put(protect, updateEvent)
     .delete(protect, deleteEvent);

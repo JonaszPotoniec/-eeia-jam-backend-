@@ -1,11 +1,12 @@
 import {EventType} from '../db/connect.js'
+import * as statuses from './httpStatusCodes.js' 
 
 const getEventType = async (req,res) => {
     try {
         const found = await EventType.findAll();
-        res.status(statuses.HTTP_FOUND).json(found);
+        respondWithJSON(res,statuses.HTTP_FOUND,found);
     } catch(error) {
-        res.status(statuses.HTTP_NOT_FOUND).json({error: error.message});
+        respondWithError(res,statuses.HTTP_NOT_FOUND,error.message);
     }
 }
 
@@ -13,9 +14,9 @@ const postEventType = async (req, res) => {
     const body = req.body;
     try {
         const eventType = await EventType.create(body);
-        res.status(201).json(eventType);
+        respondWithJSON(res,statuses.HTTP_CREATED,eventType);
     } catch(error) {
-        res.status(400).json({error: error.message})
+        respondWithError(res,statuses.HTTP_BAD_REQUEST,error.message);
     }
 }
 
@@ -23,9 +24,9 @@ const deleteEventType = async (req, res) => {
     const id = req.params.id;
     try {
         await EventType.destroy({where: {event_type_id: id}})
-        res.status(202).json({event_type_id: id});
+        respondWithJSON(res,statuses.HTTP_ACCEPTED,{event_type_id: id});
     } catch (error){
-        res.status(400).json({error: error.message});
+        respondWithError(res,statuses.HTTP_NOT_FOUND,error.message);
     }
 }
 
@@ -35,12 +36,12 @@ const updateEventType = async (req, res) => {
     if(!eventType)
         throw new Error("User not Found");
     eventType.name = req.body.type_name || eventType.name;
-
     const updatedEventType = await EventType.save();
 
-    res.status(202).json(updatedEventType)
+    
+    respondWithJSON(res,statuses.HTTP_CREATED,updatedEventType);
     } catch(error) {
-        res.status(status.HTTP_NOT_MODIFIED).json({error: error.message});
+        respondWithError(res,statuses.HTTP_NOT_MODIFIED,error.message);
     }
 }
 

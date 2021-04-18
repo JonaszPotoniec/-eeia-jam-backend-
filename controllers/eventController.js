@@ -1,42 +1,49 @@
-import {Event} from '../db/connect.js'
+import {Event, Localization} from '../db/connect.js'
 import QueryTypes from 'sequelize'
+import {db} from '../db/connect.js'
+import * as statuses from './httpStatusCodes.js' 
+import {respondWithError, respondWithJSON} from '../config/utils.js'
 
 const getEvent = async (req, res) =>{
     try{
         const found = await Event.findAll();
-        res.json(found);
+        respondWithJSON(res,statuses.HTTP_FOUND,found);
     }catch(error){
-        res.status(400).json({error: error.message});
+        respondWithError(res,statuses.HTTP_BAD_REQUEST,error.message);
     }
 }
 
 const getClosestEvent = async (req, res) =>{
     try{
-        const found = await Event.query(
-            "SELECT * FROM events as e join localization as l on e.localization_id = l.localization_id " + 
-            "where ABS(l.longitude - :lon) <= :dis AND ABS(l.latitude - :lat) <= :dis",
+        if(req.query === true && req.query.lat && req.query.lon  && req.query.dis )
+            throw new Error("Invalid URL Parameters")
+
+        const found = await db.query(
+            "SELECT *, (ABS(latitude-:lat)+ABS(longitude-:lon))/111.111 as distance FROM Events as e join Localizations as l on e.localization_id = l.localization_id WHERE distance <= :dis ORDER BY distance ASC",
              {
                 replacements:
                 {
-                    lat:req.body.latitude,
-                    lon:req.body.longitude,
-                    dis:req.body.distance
+                    lat:req.query.lat,
+                    lon:req.query.lon,
+                    dis:req.query.dis
                 },     
-                type: QueryTypes.SELECT 
+                type: QueryTypes.SELECT, 
             });
-        res.json(found);
+        respondWithJSON(res,statuses.HTTP_FOUND,found[0]);
     }catch(error){
-        res.status(400).json({error: error.message});
+        respondWithError(res,statuses.HTTP_BAD_REQUEST,error.message);
     }
 }
 
 const postEvent = async(req,res)=>{
     try{
-        console.log(req.body)
-        const event = await Event.create(req.body);
-        res.status(201).json(event);
+        const localization = await Localization.create(req.body);
+        let event = await Event.create({...req.body, localization_id: localization.localization_id});
+        event.localization_id = localization.localization_id;
+        await event.save();
+        respondWithJSON(res,statuses.HTTP_CREATED,event);
     }catch(error){
-        res.status(400).json({error: error.message});
+        respondWithError(res,statuses.HTTP_BAD_REQUEST,error.message);
     }
 }
 
@@ -44,9 +51,13 @@ const deleteEvent = async (req, res) => {
     const id = req.params.id;
     try {
         await Event.destroy({where: {id}})
-        res.status(202).json({event_id: id});
+        respondWithJSON(res,statuses.HTTP_ACCEPTED,{event_id: id});
     } catch (error){
-        res.status(404).json({error: error.message});
+        try {
+        respondWithError(res,statuses.HTTP_NOT_FOUND,error.message);
+        } catch(error) {
+            console.log(error.message)
+        }
     }
 }
 
@@ -63,24 +74,18 @@ const updateEvent = async (req, res) => {
         event.start_date = req.body.start_date || event.start_date;
         
         const updatedEvent = event.save();
-        res.status(202).json({
-            id: updatedEvent.id,
-            title: updatedEvent.title,
-            description:updatedEvent.description,
-            is_official:updatedEvent.is_official,
-            start_date:updatedEvent.start_date
-        });
+        respondWithJSON(res,statuses.HTTP_ACCEPTED,updatedEvent);
     } catch (error){
-        res.status(404).json({error: error.message});
+        respondWithError(res,statuses.HTTP_NOT_FOUND,error.message);
     }
 }
 const getEventById  = async (req, res) => {
     const id = req.params.id;
     try{
         const found = Event.findByPk(id);
-        res.json(found);
+        respondWithJSON(res,statuses.HTTP_ACCEPTED,found);
     }catch(error){
-        res.status(404).json({error: error.message});
+        respondWithError(res,statuses.HTTP_NOT_FOUND,error.message);
     }
 }
 
