@@ -50,7 +50,7 @@ const postEvent = async(req,res)=>{
 const deleteEvent = async (req, res) => {
     const id = req.params.id;
     try {
-        await Event.destroy({where: {id}})
+        await Event.destroy({where: {event_id: id}})
         respondWithJSON(res,statuses.HTTP_ACCEPTED,{event_id: id});
     } catch (error){
         try {
@@ -72,7 +72,8 @@ const updateEvent = async (req, res) => {
         event.description = req.body.description || event.description;
         event.is_official = req.body.is_official || event.is_official;
         event.start_date = req.body.start_date || event.start_date;
-        
+        event.img_path = req.body.img_path || event.img_path;
+
         const updatedEvent = event.save();
         respondWithJSON(res,statuses.HTTP_ACCEPTED,updatedEvent);
     } catch (error){
@@ -89,11 +90,21 @@ const getEventById  = async (req, res) => {
     }
 }
 
+const dropEvents = async (req, res) => {
+    try {
+        await Event.delete({where: {},
+            truncate: true});
+    } catch(error){
+        respondWithError(res, statuses.HTTP_BAD_GATEWAY, 'lol')
+    }
+}
+
 export {
     getEvent,
     getEventById,
     postEvent,
     updateEvent,
     deleteEvent,
-    getClosestEvent
+    getClosestEvent,
+    dropEvents
 }

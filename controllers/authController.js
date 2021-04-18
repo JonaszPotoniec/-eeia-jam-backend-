@@ -19,22 +19,17 @@ const registerUser = async (req,res) => {
     const { email, password, password2, name, last_name} = req.body
 
     try{
-        if(password.localeCompare(password2) !== 0){
-            respondWithError(res, statuses.HTTP_BAD_REQUEST, "Passwords does not match!")
-            return;
-        }
+        if(password.localeCompare(password2) !== 0)
+            throw new Error("Passwords does not match!")
 
         let user = await User.findOne({where: {email: email}});
         if(user){
-            respondWithError(res, statuses.HTTP_BAD_REQUEST, "User with that email already exists!")
-            return;
+            throw new Error("Email is taken!");
         }
 
         user = await User.create({email, password, name, last_name});
-        if(!user){
-            respondWithError(res, statuses.HTTP_BAD_REQUEST, "Wrong Form Update!")
-            return;
-        }
+        if(!user)
+            throw new Error("Wrong form data input!");
         
         const hashedStr = cryptoRandomString({length: 128});
         const user_id = user.get('user_id');
@@ -47,18 +42,20 @@ const registerUser = async (req,res) => {
             from: "teslamatb@gmail.com",
             to: user.get('email'),
             subject: "Verification email",
-            text: `http://localhost:5000/verify/${hash.get('hash')}`
-        }
+            html: `<h1>Near me!</h1>
+                   <h3>Your verification link:</h3>
+                   <a href = http://localhost:5000/verify/${hash.get('hash')}>click me!</b>        
+                  `
+            }
 
         transporter.sendMail(mailOptions, (err, info) => {
             if(err)
                 throw new Error("mailer error");
         });
 
-        respondWithJSON(res,statuses.HTTP_OK,{
-            user,
-            authToken: await user.generateAuthToken(),
-        });
+        const authToken = await user.generateAuthToken()
+        res.cookie("jwt", authToken, {httpOnly: true, maxAge: 60 * 60 * 1000 * 60})
+        respondWithJSON(res,statuses.HTTP_OK, user);
     }catch(error){
         respondWithError(res,statuses.HTTP_BAD_REQUEST,error.message);
     }
@@ -76,11 +73,10 @@ const loginUser = async (req, res, next) => {
         if(!user.get('verified'))
             throw new Error("user is not verified")
 
-            respondWithJSON(res,statuses.HTTP_ACCEPTED,{
-            user,
-            authToken: await user.generateAuthToken()
-        });
+        const authToken = await user.generateAuthToken()
+        res.cookie("jwt", authToken, {httpOnly: true, maxAge: 60 * 60 * 60* 1000})
 
+        respondWithJSON(res,statuses.HTTP_ACCEPTED,user);
     } catch (error){
          respondWithError(res,statuses.HTTP_NOT_FOUND,error.message);
     }
@@ -92,34 +88,9 @@ const logout = async (req,res,next) => {
     res.cookie('jwt', '', {maxAge:1});
 }
 
-const sendMail = async(req, res) => {
-    try {
-
-        console.log("ssds")
-        const confirm = await transporter.sendMail({
-            from: "ALOCATOR",
-            to: 'dawid1234999@gmail.com',
-            text: "LUBIE ALOKOWAC MALE STERTY"
-        }).
-
-        if(confirm)
-            respondWithJSON(res,statuses.HTTP_OK,"EMAIL SENT");
-    
-        respondWithError(res,statuses.HTTP_BAD_REQUEST,"EMAIL was not sent");
-        
-
-
-    } catch (error ){
-         throw new Error({error: "SENDING EMAIL ERROR"})
-    }
-}
-
-
 
 const verify = async (req,res) => {
     const hashStr = req.params.hash;
-
-    console.log(hashStr);
     
     try {
         const hash = await Hash.findOne({where: {hash: hashStr}});
@@ -136,6 +107,8 @@ const verify = async (req,res) => {
         await user.save();
         await hash.destroy();
 
+
+        respondWithJSON(res,statuses.HTTP_OK,{description:"user successfully verified"});
     } catch (error){
          respondWithError(res,statuses.HTTP_NOT_FOUND,error.message);
     }
@@ -145,6 +118,6 @@ const verify = async (req,res) => {
 export {
     registerUser,
     loginUser,
-    sendMail,
-    verify
+    verify,
+    logout,
 }

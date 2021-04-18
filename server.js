@@ -1,3 +1,5 @@
+import dotenv from 'dotenv'
+dotenv.config();
 import express from 'express';
 import {connect, User} from './db/connect.js';
 import eventsRoutes from './routes/eventRoutes.js'
@@ -10,6 +12,7 @@ import cp from 'cookie-parser'
 import path from 'path'
 import expressValidator from 'express-validator'
 import uploadRoutes from './routes/uploadRoutes.js'
+
 
 const PORT = process.env.PORT || 5000;
 const app = express();
@@ -31,7 +34,7 @@ app.use('/uploads', express.static(path.join(__dirname, '/uploads')))
 
 
 app.get('/', (req,res)=>{
-    res.send("JONASZ PAJTONIEC JONASZ PAJTONIEC")
+    res.send("NearMe api 2021")
 })
 
 connect()

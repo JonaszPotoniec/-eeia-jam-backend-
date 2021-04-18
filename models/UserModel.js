@@ -41,9 +41,7 @@ const userInit = (db) => {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
-    }
-
-
+    },
   });
   
   User.beforeCreate(async (user) => {

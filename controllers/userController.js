@@ -55,7 +55,7 @@ const getUserById = async (req, res) => {
     const id = req.params.id;
     try {
         const found = await User.findByPk(id);
-        respondWithJSON(res,statuses.HTTP_FOUND,user);
+        respondWithJSON(res,statuses.HTTP_FOUND,found);
     } catch(error) {
         respondWithError(res,statuses.HTTP_BAD_REQUEST,error.message);
     }

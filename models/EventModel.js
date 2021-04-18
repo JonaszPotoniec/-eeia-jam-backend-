@@ -25,7 +25,11 @@ const eventInit = (db) => {
         start_date:{
             type:DataTypes.DATE,
             allowNull:false,
-        }
+        },
+        img_path:{
+            type: DataTypes.STRING,
+            allowNull: true,
+          }
     })
 
     return Event;

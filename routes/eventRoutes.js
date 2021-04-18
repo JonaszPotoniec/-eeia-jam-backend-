@@ -1,6 +1,6 @@
 import {Router} from 'express'
-import {getEvent, getEventById, postEvent, deleteEvent, updateEvent,getClosestEvent} from '../controllers/eventController.js'
-import protect from '../middleware/passport.js'
+import {getEvent, getEventById, postEvent, deleteEvent, updateEvent,getClosestEvent, dropEvents} from '../controllers/eventController.js'
+import protect from '../middleware/authMiddleware.js'
 const router = Router();
 
 router
@@ -11,11 +11,12 @@ router
 router
     .route('/events/id/:id')
     .get(getEventById)
-    .put(protect, updateEvent)
-    .delete(protect, deleteEvent);
+    .put(updateEvent)
+    .delete(deleteEvent);
 
 router
     .route('/events/nearest')
     .get(getClosestEvent);
+
 
 export default router;    

@@ -34,8 +34,8 @@ const upload = multer({
   },
 })
 
-router.post('/', upload.single('image'), (req, res) => {
-  res.send(`/${req.file.path}`)
+router.post('/uploads', upload.single('image'), (req, res) => {
+  res.json({ path: `/${req.file.path}`});
 })
 
 export default router
