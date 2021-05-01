@@ -1,5 +1,6 @@
 import DataTypes from "sequelize";
 import bcrypt from "bcrypt";
+import jwt from 'jsonwebtoken'
 
 const userInit = (db) => {
   const User = db.define("User", {
@@ -12,16 +13,17 @@ const userInit = (db) => {
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      default: ''
     },
     last_name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      default: ''
     },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
       isEmail: true,
+      unique: true,
     },
     password: {
       type: DataTypes.STRING,
@@ -31,8 +33,17 @@ const userInit = (db) => {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
+      set() {
+        this.setDataValue('verified', true);
+      }
+    },
+    is_official: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
     },
   });
+  
   User.beforeCreate(async (user) => {
     const salt = await bcrypt.genSalt();
     user.password = await bcrypt.hash(user.password, salt);
@@ -41,6 +52,12 @@ const userInit = (db) => {
   User.prototype.matchPassword = async function (password) {
     return await bcrypt.compare(password, this.password);
   };
+  
+  User.prototype.generateAuthToken = async function () {
+    return jwt.sign({user_id: this.user_id}, '123456', {expiresIn: '1h'})
+  }
+ 
   return User;
-}
+};
+
 export default userInit;
